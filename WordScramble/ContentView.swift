@@ -29,10 +29,12 @@ struct ContentView: View {
                 }
             }
             .navigationTitle(rootWord)
+            // When we click enter on the keyboard submit.
             .onSubmit(addNewWord)
+            // onAppear -> When this view is shown startGame
+            .onAppear(perform: startGame)
         }
     }
-
     func addNewWord() {
         // lowerCased and remove whiteSpace and NewLines.
         let answer = newWord.lowercased().trimmingCharacters(
@@ -40,13 +42,31 @@ struct ContentView: View {
         )
         // Make sure there is at least one character in the String answer
         guard answer.count > 0 else { return }
-
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
-
         newWord = ""
     }
+    
+    func startGame() {
+        // Retrieving the file
+        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            // Loading of the file
+            if let startWords = (
+                try? String(contentsOf: startWordsURL, encoding: .utf8)) {
+                // Create the allWords Array
+                let allWords = startWords.components(separatedBy: "\n")
+                // rootWord == a randow word in the array of allWords.
+                // randomElement() returns an optional so nil coalescing "silkworm"
+                rootWord = allWords.randomElement() ?? "silkworm"
+                return
+            }
+        }
+        // If we get into this scope that means there is a problem.
+        fatalError("Could not load start.txt from bundle.")
+    }
+    
+    
 }
 
 #Preview {
